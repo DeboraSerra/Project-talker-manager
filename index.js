@@ -5,7 +5,8 @@ const readTalker = require('./readTalker');
 const { validateLoginEmail, validateLoginPassword } = require('./validateLogin');
 const token = require('./generateToken');
 const validateToken = require('./validateToken');
-const { validatePostAge, validatePostName, validatePostTalk, validateWatchDate } = require('./validateTalkerPost');
+const { validatePostAge, validatePostName, validateRate,
+  validatePostTalk, validateWatchDate } = require('./validateTalkerPost');
 
 const app = express();
 app.use(bodyParser.json());
@@ -22,7 +23,7 @@ app.get('/talker', async (req, res) => {
   const response = await readTalker();
   const file = JSON.parse(response);
   res.status(200).json(file);
-})
+});
 
 app.get('/talker/search',
   validateToken,
@@ -31,24 +32,22 @@ app.get('/talker/search',
     const file = JSON.parse(await readTalker());
     const result = file.filter((t) => t.name.includes(q));
     res.status(200).json(result);
-  }
-)
+  });
 
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
   const file = JSON.parse(await readTalker());
   const talker = file.find((t) => t.id === Number(id));
-  if (!talker) return res.status(404).json({ "message": "Pessoa palestrante não encontrada" });
+  if (!talker) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
   res.status(200).json(talker);
-})
+});
 
 app.post('/login',
   validateLoginEmail,
   validateLoginPassword,
   (req, res) => {
     res.status(200).json({ token: token() });
-  }
-)
+  });
 
 app.use(validateToken);
 
@@ -57,6 +56,7 @@ app.post('/talker',
   validatePostName,
   validatePostTalk,
   validateWatchDate,
+  validateRate,
   async (req, res) => {
     const { name, age, talk } = req.body;
     const file = JSON.parse(await readTalker());
@@ -64,8 +64,7 @@ app.post('/talker',
     file.push({ id, name, age, talk });
     await fs.writeFile('./talker.json', JSON.stringify(file));
     res.status(201).json({ id, name, age, talk });
-  }
-)
+  });
 
 app.put(
   '/talker/:id',
@@ -73,6 +72,7 @@ app.put(
   validatePostAge,
   validatePostTalk,
   validateWatchDate,
+  validateRate,
   async (req, res) => {
     const file = JSON.parse(await readTalker());
     const { id } = req.params;
@@ -82,8 +82,8 @@ app.put(
     file[index] = { ...file[index], name, age, talk };
     await fs.writeFile('./talker.json', JSON.stringify(file));
     res.status(200).json({ id: Number(id), name, age, talk });
-  }
-)
+  },
+);
 
 app.delete(
   '/talker/:id',
@@ -95,8 +95,8 @@ app.delete(
     file.splice(index, 1);
     await fs.writeFile('./talker.json', JSON.stringify(file));
     res.status(204).end();
-  }
-)
+  },
+);
 
 app.listen(PORT, () => {
   console.log('Online');
