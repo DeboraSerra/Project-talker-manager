@@ -1,5 +1,6 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const readTalker = require('./readTalker');
 
 const app = express();
 app.use(bodyParser.json());
@@ -11,6 +12,12 @@ const PORT = '3000';
 app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
 });
+
+app.get('/talker', async (req, res) => {
+  const response = await readTalker();
+  const file = JSON.parse(response);
+  res.status(200).json(file);
+})
 
 app.listen(PORT, () => {
   console.log('Online');
