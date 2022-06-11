@@ -1,8 +1,11 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const fs = require('fs').promises;
 const readTalker = require('./readTalker');
 const { validateLoginEmail, validateLoginPassword } = require('./validateLogin');
 const token = require('./generateToken');
+const validateToken = require('./validateToken');
+const { validatePostAge, validatePostName, validatePostTalk, validateWatchDate } = require('./validateTalkerPost');
 
 const app = express();
 app.use(bodyParser.json());
@@ -34,6 +37,23 @@ app.post('/login',
   validateLoginPassword,
   (req, res) => {
     res.status(200).json({ token: token() });
+  }
+)
+
+app.use(validateToken);
+
+app.post('/talker',
+  validatePostAge,
+  validatePostName,
+  validatePostTalk,
+  validateWatchDate,
+  async (req, res) => {
+    const { name, age, talk } = req.body;
+    const file = JSON.parse(await readTalker());
+    const id = file.length + 1;
+    file.push({ id, name, age, talk });
+    await fs.writeFile('./talker.json', JSON.stringify(file));
+    res.status(201).json({ id, name, age, talk });
   }
 )
 
