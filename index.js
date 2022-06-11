@@ -24,6 +24,16 @@ app.get('/talker', async (req, res) => {
   res.status(200).json(file);
 })
 
+app.get('/talker/search',
+  validateToken,
+  async (req, res) => {
+    const { q } = req.query;
+    const file = JSON.parse(await readTalker());
+    const result = file.filter((t) => t.name.includes(q));
+    res.status(200).json(result);
+  }
+)
+
 app.get('/talker/:id', async (req, res) => {
   const { id } = req.params;
   const file = JSON.parse(await readTalker());
@@ -59,7 +69,6 @@ app.post('/talker',
 
 app.put(
   '/talker/:id',
-  validateToken,
   validatePostName,
   validatePostAge,
   validatePostTalk,
@@ -78,7 +87,6 @@ app.put(
 
 app.delete(
   '/talker/:id',
-  validateToken,
   async (req, res) => {
     const { id } = req.params;
     const file = JSON.parse(await readTalker());
