@@ -76,6 +76,20 @@ app.put(
   }
 )
 
+app.delete(
+  '/talker/:id',
+  validateToken,
+  async (req, res) => {
+    const { id } = req.params;
+    const file = JSON.parse(await readTalker());
+    const index = file.findIndex((f) => f.id === Number(id));
+    if (index === -1) return res.status(404).json({ message: 'Talker not found' });
+    file.splice(index, 1);
+    await fs.writeFile('./talker.json', JSON.stringify(file));
+    res.status(204).end();
+  }
+)
+
 app.listen(PORT, () => {
   console.log('Online');
 });
