@@ -1,6 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const readTalker = require('./readTalker');
+const { validateLoginEmail, validateLoginPassword } = require('./validateLogin');
+const token = require('./generateToken');
 
 const app = express();
 app.use(bodyParser.json());
@@ -26,6 +28,14 @@ app.get('/talker/:id', async (req, res) => {
   if (!talker) return res.status(404).json({ "message": "Pessoa palestrante não encontrada" });
   res.status(200).json(talker);
 })
+
+app.post('/login',
+  validateLoginEmail,
+  validateLoginPassword,
+  (req, res) => {
+    res.status(200).json({ token: token() });
+  }
+)
 
 app.listen(PORT, () => {
   console.log('Online');
