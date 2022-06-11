@@ -57,6 +57,25 @@ app.post('/talker',
   }
 )
 
+app.put(
+  '/talker/:id',
+  validateToken,
+  validatePostName,
+  validatePostAge,
+  validatePostTalk,
+  validateWatchDate,
+  async (req, res) => {
+    const file = JSON.parse(await readTalker());
+    const { id } = req.params;
+    const { name, age, talk } = req.body;
+    const index = file.findIndex((f) => f.id === Number(id));
+    if (index === -1) return res.status(404).json({ message: 'Talker not found' });
+    file[index] = { ...file[index], name, age, talk };
+    await fs.writeFile('./talker.json', JSON.stringify(file));
+    res.status(200).json({ id: Number(id), name, age, talk });
+  }
+)
+
 app.listen(PORT, () => {
   console.log('Online');
 });
